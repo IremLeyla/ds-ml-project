@@ -139,3 +139,7 @@ dmypy.json
 # nbdime Stuff
 .gitattributes
 
+
+# Competition data (do not push to the public repo)
+data/*
+!data/.gitkeep

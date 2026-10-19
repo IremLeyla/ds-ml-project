@@ -139,3 +139,6 @@ dmypy.json
 # nbdime Stuff
 .gitattributes
 
+
+# Raw data (too large / not for git)
+data/raw/

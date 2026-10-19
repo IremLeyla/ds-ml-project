@@ -140,5 +140,6 @@ dmypy.json
 .gitattributes
 
 
-# Raw data (too large / not for git)
-data/raw/
+# Competition data (do not push to the public repo)
+data/*
+!data/.gitkeep

@@ -27,7 +27,7 @@ Details and charts: [06_eda-analysis.ipynb](06_eda-analysis.ipynb). Gas vs elect
 | `region` | 1 | as category | Clear differences between big regions |
 | `has_backward`, `backward_count` | 6 | bills where `new_index < old_index` | Twice the fraud rate |
 | `max_consumption`, median and mean consumption | 7 | max, median, mean of the total consumption per bill | Fraud rate rises with the biggest bill. Do not cap. |
-| `consommation_level_1` to `consommation_level_4` | none (column check) | the four original columns, aggregated per client like the total consumption (sum, mean, max). No new level features. | Clients with all bills level-1-only are fraud only 1.7% (vs 6.9%), also inside each consumption group, so the levels add information beyond the total. Do not drop the level columns. |
+| `consommation_level_1` to `consommation_level_4` | none (column check) | the four original columns, aggregated per client as sum and max (biggest single bill per level). No mean (it is sum / `n_bills`). No new level features. | Clients with all bills level-1-only are fraud only 1.7% (vs 6.9%), also inside each consumption group, so the levels add information beyond the total. Do not drop the level columns. |
 | `max_change`, `std_cons` | 2 | biggest jump between bills within one meter, and std. Also per meter (`_elec`, `_gaz`), keep only if validation improves | Fraud clients are less steady, mainly on electricity |
 | `tarif_type` | 4 | most common plan, rare plans grouped as "other" | Plan 10 is above average on electricity. Plan 40 only reflects the gas meter. |
 

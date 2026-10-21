@@ -3,7 +3,7 @@
 Details and charts: [06_eda-analysis.ipynb](06_eda-analysis.ipynb). Gas vs electricity: [07_hypotheses-gas-vs-elec.ipynb](07_hypotheses-gas-vs-elec.ipynb). Hypotheses: [hypotheses.md](hypotheses.md). Team decisions: [protocol.md](protocol.md).
 
 ## The data in short
-- **135,493 clients** in train. Only **5.6%** are fraud, so the data is imbalanced (we judge with F1, precision and recall, not accuracy).
+- **135,493 clients** in train. Only **5.6%** are fraud, so the data is imbalanced. Accuracy would be misleading, so our main metric is ROC-AUC (see [protocol.md](protocol.md)). PR-AUC, precision, recall and F1 are reported next to it.
 - The invoice table has about **4.5 million bills**, around 30 per client. The model needs **one row per client**, so we must summarize the bills into features.
 - Every bill belongs to a known client, and every client has bills. Joining loses nobody.
 

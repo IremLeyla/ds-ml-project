@@ -13,6 +13,10 @@ import pandas as pd
 LEVEL_COLUMNS = [f"consommation_level_{i}" for i in range(1, 5)]
 METERS = {"ELEC": "elec", "GAZ": "gaz"}
 OTHER_CATEGORY = -1
+# fixed reference date for client age (the data ends in 2019), the same for train and test
+REFERENCE_DATE = pd.Timestamp("2020-01-01")
+# "recent" bills: the last two years of a client's history
+RECENT_DAYS = 730
 
 
 def _add_bill_columns(invoices):
@@ -84,6 +88,59 @@ def build_features(clients, invoices):
     features = features.join(client_part)
 
     return features
+
+
+def build_extra_features(clients, invoices):
+    """Extra features per client for the feature selection test (notebook 13).
+
+    Like build_features(), every value comes from the client's own bills and
+    client row, so nothing is learned from other clients and the same function
+    is used for train, validation and test.
+    """
+    bills = _add_bill_columns(invoices)
+    by_client = bills.groupby("client_id")
+    n_bills = by_client.size()
+
+    extra = pd.DataFrame(index=pd.Index(sorted(clients["client_id"]), name="client_id"))
+
+    # A. Per-bill levels: the level sums divided by the number of bills
+    for level in LEVEL_COLUMNS:
+        extra[f"{level}_per_bill"] = by_client[level].sum() / n_bills
+
+    # B. Time: client age, length of the bill history and gaps between bills
+    created = clients.set_index("client_id")["creation_date"]
+    extra["client_age_years"] = (REFERENCE_DATE - created).dt.days / 365.25
+    first_bill, last_bill = by_client["invoice_date"].min(), by_client["invoice_date"].max()
+    extra["history_years"] = (last_bill - first_bill).dt.days / 365.25
+    # a history shorter than one month counts as one month, so one bill does not divide by zero
+    extra["bills_per_year"] = n_bills / extra["history_years"].clip(lower=1 / 12)
+    # gaps between distinct bill dates (electricity and gas are often billed on the same day)
+    dates = bills[["client_id", "invoice_date"]].drop_duplicates().sort_values(["client_id", "invoice_date"])
+    gaps = dates.groupby("client_id")["invoice_date"].diff().dt.days
+    extra["gap_mean_days"] = gaps.groupby(dates["client_id"]).mean()
+    extra["gap_max_days"] = gaps.groupby(dates["client_id"]).max()
+    extra["months_number_mean"] = by_client["months_number"].mean()
+    extra["months_number_max"] = by_client["months_number"].max()
+
+    # C. Change over time: recent vs. early consumption, biggest drop, bills with no consumption
+    recent = bills["invoice_date"] > bills["client_id"].map(last_bill) - pd.Timedelta(days=RECENT_DAYS)
+    recent_mean = bills[recent].groupby("client_id")["consumption"].mean()
+    early_mean = bills[~recent].groupby("client_id")["consumption"].mean()
+    # +1 avoids dividing by zero; NaN = no bill before the last two years
+    extra["recent_vs_early"] = (recent_mean + 1) / (early_mean + 1)
+    ordered = bills.sort_values(["client_id", "counter_type", "invoice_date"])
+    change = ordered.groupby(["client_id", "counter_type"])["consumption"].diff()
+    # biggest decrease between consecutive bills of one meter; 0 if there is none (like max_change)
+    extra["max_drop"] = (-change).clip(lower=0).groupby(ordered["client_id"]).max().fillna(0)
+    extra["zero_share"] = (bills["consumption"] == 0).groupby(bills["client_id"]).mean()
+
+    # D. Meter: meter changes and unusual meter readings
+    extra["n_counters"] = by_client["counter_number"].nunique()
+    # status 0 is the normal case; odd values were set to NaN in cleaning and count as unusual
+    extra["statue_unusual_share"] = (bills["counter_statue"] != 0).groupby(bills["client_id"]).mean()
+    extra["coef_not1_share"] = (bills["counter_coefficient"] != 1).groupby(bills["client_id"]).mean()
+
+    return extra
 
 
 def group_rare(values, keep, other=OTHER_CATEGORY):

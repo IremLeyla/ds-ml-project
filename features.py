@@ -143,6 +143,47 @@ def build_extra_features(clients, invoices):
     return extra
 
 
+def build_diversity_features(clients, invoices):
+    """Diversity, consumption-shape and time-activity features per client (notebook 16).
+
+    Like build_features(), every value comes from the client's own bills, so
+    nothing is learned from other clients and the same function is used for
+    train, validation and test.
+    """
+    bills = _add_bill_columns(invoices)
+    by_client = bills.groupby("client_id")
+
+    extra = pd.DataFrame(index=pd.Index(sorted(clients["client_id"]), name="client_id"))
+
+    # Diversity of the meter setup: how many different codes, remarks and tariffs a client has
+    extra["n_codes"] = by_client["counter_code"].nunique()
+    extra["n_remarque"] = by_client["reading_remarque"].nunique()
+    extra["n_tarif"] = by_client["tarif_type"].nunique()
+    extra["remarque_8_share"] = (bills["reading_remarque"] == 8).groupby(bills["client_id"]).mean()
+
+    # Consumption shape; +1 avoids dividing by zero for clients without consumption
+    cons = by_client["consumption"]
+    # std of a single bill is not defined: set to 0 (team rule, as for cons_std)
+    extra["cons_cv"] = (cons.std() / (cons.mean() + 1)).fillna(0)
+    total = cons.sum() + 1
+    extra["level2_3_share"] = (by_client["consommation_level_2"].sum() + by_client["consommation_level_3"].sum()) / total
+    extra["level4_share"] = by_client["consommation_level_4"].sum() / total
+    extra["cons_p90_over_median"] = (cons.quantile(0.9) + 1) / (cons.median() + 1)
+
+    # Time activity: how recent and how dense the bills are
+    last_bill = by_client["invoice_date"].max()
+    recent = bills["invoice_date"] > bills["client_id"].map(last_bill) - pd.Timedelta(days=RECENT_DAYS)
+    extra["share_last_2y"] = recent.groupby(bills["client_id"]).mean()
+    in_2016_17 = bills["invoice_date"].dt.year.isin([2016, 2017])
+    extra["bills_in_2016_17"] = in_2016_17.groupby(bills["client_id"]).sum()
+    extra["days_since_last_bill"] = (REFERENCE_DATE - last_bill).dt.days
+    # bills per billing date, counting each (date, meter type) once
+    pairs = bills[["client_id", "invoice_date", "counter_type"]].drop_duplicates().groupby("client_id").size()
+    extra["inv_per_date"] = pairs / by_client["invoice_date"].nunique()
+
+    return extra
+
+
 def group_rare(values, keep, other=OTHER_CATEGORY):
     """Replace every category that is not in `keep` by `other`.
 

@@ -1,8 +1,8 @@
 # Fraud Detection: EDA Hypotheses
 
-Guesses about what fraud might look like. Each one is checked in EDA (fraud vs non-fraud), and the ones that hold up become features. The tests are in [06_eda-analysis.ipynb](06_eda-analysis.ipynb), in the same order and with the same numbers. Overall fraud rate in train: **5.6%**.
+Guesses about what fraud might look like. Each one is checked in EDA (fraud vs non-fraud), and the ones that hold up become features. The tests are in [03_eda-analysis.ipynb](03_eda-analysis.ipynb), in the same order and with the same numbers. Overall fraud rate in train: **5.6%**.
 
-**Gas vs electricity:** [07_hypotheses-gas-vs-elec.ipynb](07_hypotheses-gas-vs-elec.ipynb) repeats every test separately for ELEC and GAZ (features calculated only from the bills of one meter). The label belongs to the client, so we cannot say which meter was manipulated. Gas rates in 07 rest on smaller groups. Results from 07 are marked "(07)" below. The team decided to keep 06 as the main analysis and build per-meter features only if they improve the validation score (see [protocol.md](protocol.md)).
+**Gas vs electricity:** [04_hypotheses-gas-vs-elec.ipynb](04_hypotheses-gas-vs-elec.ipynb) repeats every test separately for ELEC and GAZ (features calculated only from the bills of one meter). The label belongs to the client, so we cannot say which meter was manipulated. Gas rates in 07 rest on smaller groups. Results from 07 are marked "(07)" below. The team decided to keep 06 as the main analysis and build per-meter features only if they improve the validation score (see [protocol.md](protocol.md)).
 
 **Review by our data analyst agent:** the agent found that the **number of bills** per client is linked to fraud (1.3% for 1 to 10 bills, 9.0% for 51 or more) and explains part of some effects. Changes made because of its suggestions are marked "(agent)".
 

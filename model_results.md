@@ -4,15 +4,15 @@ All models of the project, scored **the same way** on the **validation split** (
 
 | Validation, mean of 3 seeds | ROC-AUC | PR-AUC | Precision | Recall | F1 | Caught | Missed | False alarms |
 |---|---|---|---|---|---|---|---|---|
-| Logistic regression baseline (nb 09), 57 cols | 0.757 | 0.156 | 0.154 | 0.433 | 0.227 | 655 | 858 | 3,593 |
-| Random Forest, default, weighted (nb 10), 24 features | 0.743 | 0.143 | 0.155 | 0.391 | 0.221 | 592 | 921 | 3,255 |
-| XGBoost, default, weighted (nb 10), 24 features | 0.743 | 0.157 | 0.165 | 0.356 | 0.226 | 539 | 974 | 2,725 |
-| LightGBM, default, weighted (nb 10), 24 features | 0.767 | 0.178 | 0.164 | 0.445 | 0.240 | 673 | 840 | 3,429 |
-| LightGBM, tuned (nb 11 settings), 24 features | 0.774 | 0.184 | 0.201 | 0.344 | 0.252 | 521 | 992 | 2,109 |
-| LightGBM, nb 11 settings, 30 features (feature set v2, nb 13) | 0.858 | 0.317 | 0.330 | 0.446 | 0.378 | 674 | 839 | 1,383 |
-| LightGBM, v2 settings, 30 features (nb 14) | 0.859 | 0.324 | 0.325 | 0.467 | 0.383 | 706 | 807 | 1,470 |
-| LightGBM, v2 settings, 27 base (nb 16) | 0.859 | 0.326 | 0.324 | 0.454 | 0.378 | 687 | 826 | 1,432 |
-| **Final: LightGBM, v2 settings, 39 features (feature set v3, nb 16)** | **0.881** | **0.371** | **0.367** | **0.504** | **0.424** | **763** | **750** | **1,325** |
+| Logistic regression baseline (nb 07), 57 cols | 0.757 | 0.156 | 0.154 | 0.433 | 0.227 | 655 | 858 | 3,593 |
+| Random Forest, default, weighted (nb 08), 24 features | 0.743 | 0.143 | 0.155 | 0.391 | 0.221 | 592 | 921 | 3,255 |
+| XGBoost, default, weighted (nb 08), 24 features | 0.743 | 0.157 | 0.165 | 0.356 | 0.226 | 539 | 974 | 2,725 |
+| LightGBM, default, weighted (nb 08), 24 features | 0.767 | 0.178 | 0.164 | 0.445 | 0.240 | 673 | 840 | 3,429 |
+| LightGBM, tuned (nb 09 settings), 24 features | 0.774 | 0.184 | 0.201 | 0.344 | 0.252 | 521 | 992 | 2,109 |
+| LightGBM, nb 09 settings, 30 features (feature set v2, nb 11) | 0.858 | 0.317 | 0.330 | 0.446 | 0.378 | 674 | 839 | 1,383 |
+| LightGBM, v2 settings, 30 features (nb 12) | 0.859 | 0.324 | 0.325 | 0.467 | 0.383 | 706 | 807 | 1,470 |
+| LightGBM, v2 settings, 27 base (nb 13) | 0.859 | 0.326 | 0.324 | 0.454 | 0.378 | 687 | 826 | 1,432 |
+| **Final: LightGBM, v2 settings, 39 features (feature set v3, nb 13)** | **0.881** | **0.371** | **0.367** | **0.504** | **0.424** | **763** | **750** | **1,325** |
 
 ## What changed at each step
 
@@ -33,8 +33,8 @@ The big steps came from the **features** (+0.084 and +0.022), not from the model
 | Check | Result |
 |---|---|
 | 5-fold CV on the training split | ROC-AUC 0.848 → **0.872** (27 base → 39 features), better in 5 of 5 folds |
-| CV on all 135,493 labelled clients (nb 15) | ROC-AUC **0.876** (± 0.003), PR-AUC 0.355 |
-| Inspection scenario: top 10% flagged (2,710 visits, seed 42) | **864 of 1,513 fraud cases caught (57%)**, hit rate 32% (first model, nb 12: 517 caught, 34%) |
+| CV on all 135,493 labelled clients (nb 14) | ROC-AUC **0.876** (± 0.003), PR-AUC 0.355 |
+| Inspection scenario: top 10% flagged (2,710 visits, seed 42) | **864 of 1,513 fraud cases caught (57%)**, hit rate 32% (first model, nb 10: 517 caught, 34%) |
 | **Zindi public score** (test set, 2026-10-22) | **ROC-AUC 0.8738**, within 0.003 of the CV estimate (0.876) |
 
 ## Compared with published solutions (same STEG data)

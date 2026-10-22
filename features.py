@@ -91,7 +91,7 @@ def build_features(clients, invoices):
 
 
 def build_extra_features(clients, invoices):
-    """Extra features per client for the feature selection test (notebook 13).
+    """Extra features per client for the feature selection test (notebook 11).
 
     Like build_features(), every value comes from the client's own bills and
     client row, so nothing is learned from other clients and the same function
@@ -144,7 +144,7 @@ def build_extra_features(clients, invoices):
 
 
 def build_diversity_features(clients, invoices):
-    """Diversity, consumption-shape and time-activity features per client (notebook 16).
+    """Diversity, consumption-shape and time-activity features per client (notebook 13).
 
     Like build_features(), every value comes from the client's own bills, so
     nothing is learned from other clients and the same function is used for

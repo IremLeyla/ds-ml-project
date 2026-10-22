@@ -1,6 +1,6 @@
 # EDA Summary
 
-Details and charts: [06_eda-analysis.ipynb](06_eda-analysis.ipynb). Gas vs electricity: [07_hypotheses-gas-vs-elec.ipynb](07_hypotheses-gas-vs-elec.ipynb). Hypotheses: [hypotheses.md](hypotheses.md). Team decisions: [protocol.md](protocol.md).
+Details and charts: [03_eda-analysis.ipynb](03_eda-analysis.ipynb). Gas vs electricity: [04_hypotheses-gas-vs-elec.ipynb](04_hypotheses-gas-vs-elec.ipynb). Hypotheses: [hypotheses.md](hypotheses.md). Team decisions: [protocol.md](protocol.md).
 
 ## The data in short
 - **135,493 clients** in train. Only **5.6%** are fraud, so the data is imbalanced. Accuracy would be misleading, so our main metric is ROC-AUC (see [protocol.md](protocol.md)). PR-AUC, precision, recall and F1 are reported next to it.

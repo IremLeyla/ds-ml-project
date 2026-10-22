@@ -1,152 +1,101 @@
-# Machine Learning Project Template
+# Fraud Detection in Electricity and Gas Consumption
 
-A starting point for your team machine learning project. The repository ships an example notebook that trains a simple model with minimal cleaning and feature selection. Use it as scaffolding, then build your own project on top of it.
+**Team:** Tim Pfeiffer, Irem Baykal, Dhanya Rajendran
 
-The example uses the [coffee quality dataset](https://github.com/jldbc/coffee-quality-database).
+A machine learning project from the [neuefische](https://www.neuefische.de/) Data Science bootcamp. We built a model that helps the Tunisian electricity and gas company **STEG** find clients who manipulate their meters. We worked on the [Zindi challenge "Fraud Detection in Electricity and Gas Consumption"](https://zindi.africa/competitions/fraud-detection-in-electricity-and-gas-consumption-challenge), with real billing data from 2005 to 2019.
 
-## Learning Objectives
+## Results at a glance
 
-By the end of this repository, you should be able to:
-
-- Work on a data science project as a team, sharing the work across the data science lifecycle.
-- Frame a business problem as a machine learning task and choose a performance metric that fits the value you want to create.
-- Build a baseline model, then iterate with error analysis and at least three algorithms (including cross validation and hyperparameter tuning).
-- Communicate your findings and recommendations to a non-technical audience in a short presentation.
-
-## Learning Path
-
-Your project follows the data science lifecycle:
-
-```mermaid
-flowchart LR
-    A[Data] --> B[EDA]
-    B --> C[Baseline model]
-    C --> D[Error analysis and iteration]
-    D --> E[Stakeholder presentation]
-```
-
-Start with the assignment, set up your board, then use the example notebook as a reference:
-
-| File / Folder | Description |
+| | ROC-AUC |
 |---|---|
-| [**Assignment**](01_assignment.md) | The project brief: timeline, milestones, project options, deliverables, and things to think about. |
-| [**Kanban Board**](02_kanban_board.md) | Step-by-step setup of a GitHub project board to plan and track your work. |
-| [**EDA and Modeling**](03_eda-and-modeling.ipynb) | Worked example of selecting features, doing minimal cleaning, and training a simple model. |
+| Baseline (logistic regression) | 0.757 |
+| First tuned model (LightGBM, 24 features) | 0.774 |
+| **Final model (LightGBM, 39 features)** | **0.881** (validation), **0.876** (5-fold CV) |
+| **Zindi public leaderboard** | **0.874** |
 
-### Additional Folders and Files
+- If STEG inspects the **10% of clients** with the highest fraud score, the final model finds **57% of all fraud cases**. Every third visit is a hit, against 1 in 18 for random visits.
+- Our first tuned model found 34% in the same scenario.
+- The public score is close to our cross-validation estimate (0.874 vs 0.876), so the validation was honest.
+- For comparison, published solutions on the same data reach about 0.864 (top 25%) and 0.883 (4th place of the original challenge). See [model_results.md](model_results.md).
 
-| File / Folder | Description |
+## The problem
+
+- **Stakeholder:** STEG loses about 200 million Tunisian dinars because consumers tamper with their meters. It can only inspect a limited number of homes.
+- **Task:** binary classification at client level (fraud yes/no), from the client table and about 4.5 million bills.
+- **Output:** a fraud probability per client, used as a **priority list for inspections**.
+- **Main metric: ROC-AUC.** It is the official Zindi metric and measures how well the model ranks fraud cases above honest clients. Only 5.6% of the clients are fraud, so accuracy would be misleading. We also report PR-AUC, precision, recall and F1.
+
+## Our approach
+
+1. **Data and EDA:** loaded and joined the tables, defined cleaning rules (the same for train and test), and checked hypotheses about what fraud looks like, separately for gas and electricity.
+2. **Feature engineering:** aggregated the bills to one row per client, with an 80/20 train/validation split made early and learned steps fitted on train only, so there is no leakage.
+3. **Baseline:** a logistic regression as the score to beat.
+4. **Model comparison:** logistic regression, Random Forest, XGBoost and LightGBM with default settings and 5-fold stratified cross-validation. LightGBM won.
+5. **Hyperparameter tuning:** a random search with cross-validation.
+6. **Error analysis:** which fraud cases does the model miss, and why? This analysis led to the next steps.
+7. **Feature selection:** tested groups of new features against a fixed model, fold by fold.
+   - Time features and meter features: +0.08 ROC-AUC.
+   - Meter-setup diversity features: another +0.02.
+8. **Final model and submission:** trained on all labelled clients, predicted the Zindi test set, and submitted once (no tuning on the leaderboard).
+
+The biggest improvements came from **features built from the error analysis**, not from model settings.
+
+## What we learned
+
+- Framing a business problem as an ML task and choosing a metric that fits the use: ranking for limited inspections.
+- Working with imbalanced data: class weights, threshold-free metrics, and scenario-based evaluation such as "top 10% inspected".
+- A clean validation setup: an early split, learned steps fitted on train only, cross-validation, and the validation split used for checks.
+- Comparing and tuning models fairly: the same folds, decision rules set before seeing the results, paired fold-by-fold comparisons.
+- Using error analysis to guide feature engineering.
+- Spotting possible leakage. Two strong features (meter replacements, inactive accounts) may partly reflect what STEG did *after* finding fraud. We documented this as a question for STEG.
+- Teamwork with GitHub issues, pull requests and a decision log ([protocol.md](protocol.md)).
+
+## Repository structure
+
+| File / folder | Content |
 |---|---|
-| [**Data**](data/) | Where your datasets go. |
-| [**Models**](models/) | Where trained models are saved. |
-| [**Assets**](assets/) | Screenshots used in the Kanban board guide. |
-| [**pyproject.toml**](pyproject.toml) | Project configuration and dependencies. |
-| [**uv.lock**](uv.lock) | Dependency lock file. |
+| [00_overview.md](00_overview.md) | **Start here:** short description of every notebook, in reading order |
+| `01`–`14` notebooks | The project, from data ingestion to the final model (see the overview). `05_eda-summary.md` sums up the EDA |
+| [model_results.md](model_results.md) | All models scored the same way, improvement steps, comparison with published solutions |
+| [protocol.md](protocol.md) | Every team decision with date and reason |
+| [problem_framing.md](problem_framing.md) | Stakeholder, value, task and metrics |
+| [hypotheses.md](hypotheses.md), [day1_insights.md](day1_insights.md) | The hypotheses we checked and the first notes |
+| [cleaning.py](cleaning.py), [features.py](features.py) | Cleaning rules and feature functions used by the notebooks |
+| `models/` | Final model (`lightgbm_final.txt`), its settings and its feature list |
+| `data/` | Not included (see below) |
 
-## Setup
+## Getting started
 
-> [!NOTE]
-> Throughout these steps, text in angle brackets like `<repo-name>` is a **placeholder**. Replace it, including the `< >` brackets, with your own value. For example, `cd <repo-name>` becomes `cd my-ml-project`.
-
-### 1. Create the Repository from the Template
-
-Click **Use this template** on GitHub.
-
-When creating the repository:
-
-- Set yourself as the **Owner**
-- Choose a repository name
-- Disable **Include all branches**
-- Click **Create repository**
-
-> [!IMPORTANT]
-> If you are working in pairs or groups, only **one person** should complete this step.
-
----
-
-### 2. Add Collaborators (Pairs/Groups Only)
-
-If working with teammates:
-
-1. Open the repository on GitHub
-2. Go to **Settings → Collaborators**
-3. Add your teammates as collaborators
-4. Share the repository link with your team
-
-Teammates should accept the invitation before continuing.
-
----
-
-### 3. Clone the Repository
-
-Copy the SSH URL from the **Code** button on GitHub, then run:
+**Requirements:** Python 3.13 and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone <copied-ssh-url>
-```
-
-The copied SSH URL will look like `git@github.com:<your-username>/<repo-name>.git`.
-
----
-
-### 4. Move into the Project Folder and Install Dependencies
-
-This installs all dependencies and creates a virtual environment in (`.venv/`).
-
-```bash
-cd <repo-name>
+git clone git@github.com:IremLeyla/ds-ml-project.git
+cd ds-ml-project
 uv sync
 ```
 
-> [!TIP]
-> This is your own project, so you will add libraries as you go. Install a new package with `uv add <package>` (for example `uv add xgboost`). It updates `pyproject.toml` and `uv.lock` for the whole team.
+**Data:** the competition data is **not part of this repository** (Zindi rules). Download it from the [Zindi data page](https://zindi.africa/competitions/fraud-detection-in-electricity-and-gas-consumption-challenge/data) and put the files in `data/`:
+- `client_train.csv`, `invoice_train.csv`,
+- `client_test.csv`, `invoice_test.csv`,
+- `SampleSubmission.csv`.
 
----
+**Run:** open the project in VS Code (`code .`), select the `.venv` kernel and run the notebooks in the order of [00_overview.md](00_overview.md). Some notebooks write cleaned data and feature tables to `data/`, which the later notebooks read.
 
-### 5. Open the Notebook
+**Main libraries:** pandas, NumPy, scikit-learn, LightGBM, XGBoost, matplotlib, seaborn.
 
-> [!NOTE]
-> Make sure you open VS Code from the project root so it automatically detects the environment created by `uv sync`.
+## Limitations
 
-Launch VS Code in the project root folder:
+- The labels only show **detected** fraud. Some "false alarms" may be fraud that was never inspected.
+- Two strong features (`n_counters`, `days_since_last_bill`) may contain information from after a fraud was found. This does not affect the Zindi score, but it should be checked with STEG before real use.
+- Part of the fraud does not show in the bills at all (small, stable, young accounts). No feature built from bills alone can find it.
+- The precision, recall and F1 numbers use a threshold chosen on validation, so they are slightly optimistic. The real cut-off depends on STEG's inspection capacity.
 
-```bash
-code .
-```
+## Acknowledgements
 
-Then open `03_eda-and-modeling.ipynb` and select the Python environment created by `uv sync` as the kernel.
+- Data: [STEG](https://www.steg.com.tn/) via [Zindi](https://zindi.africa/).
+- Project template and course: [neuefische](https://www.neuefische.de/).
+- Published solutions we compared with are linked in [model_results.md](model_results.md).
 
-## Handling Merge Conflicts in Notebooks
+## License
 
-When working in a team, `.ipynb` files can cause messy merge conflicts because they are JSON based. The `nbdime` tool makes this easier, and `uvx` runs it without adding it to your project dependencies.
-
-Enable the git integration once:
-
-```bash
-uvx nbdime config-git --enable
-```
-
-When a conflict happens, open the merge tool:
-
-```bash
-uvx nbdime mergetool
-```
-
-A web interface opens showing both notebook versions side by side. Choose what to keep, save, and close the tool, then:
-
-```bash
-git add your_notebook.ipynb
-git commit -m "Resolve notebook conflict"
-```
-
-> [!TIP]
-> When working with notebooks, it's a good idea to clear outputs before committing to reduce the chances of conflicts. You can do this in VS Code with the command palette: `Notebook: Clear All Outputs`.
-
-## References & Further Reading
-
-- [**scikit-learn Documentation**](https://scikit-learn.org/stable/): the library used for modelling, with user guides and examples.
-- [**Choosing the Right Estimator**](https://scikit-learn.org/stable/machine_learning_map.html): a visual map for picking a model based on your problem and data.
-- [**PEP 8 Style Guide for Python Code**](https://peps.python.org/pep-0008/): the style your notebook should follow.
-- [**Jupyter Notebooks in VS Code**](https://code.visualstudio.com/docs/datascience/jupyter-notebooks): how to run notebooks and pick a kernel in VS Code.
-- [**uv Documentation**](https://docs.astral.sh/uv/): the package manager that handles Python and dependencies for this repo.
-- [**Zindi Competitions**](https://zindi.africa/competitions): real-world challenges, several of which are listed as project options in the assignment.
+[MIT](LICENSE)

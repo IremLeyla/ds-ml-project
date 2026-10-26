@@ -18,7 +18,53 @@ Details and charts: [03_eda-analysis.ipynb](03_eda-analysis.ipynb). Gas vs elect
 8. **Gas vs electricity (07):** region and client category give the same result on both meters. Sudden change, index mismatch and outliers are mainly an **electricity** signal (for example mismatch 9.2% vs 5.5% on ELEC, 7.9% vs 7.1% on GAZ). Gas clients have a higher average (7.2% vs 5.6%). Many gas results rest on small groups.
 9. **Column check, consumption levels:** we checked if we can delete the four `consommation_level` columns. We keep them: clients whose bills are all in level 1 are rarely fraud (**1.7%** vs 6.9%), also for clients with similar total consumption, so the levels carry information the total does not.
 
+## What the final model really uses (for the presentation)
+
+*Status: 2026-10-23. Written for readers without a data science background. The EDA findings above are the starting point. This section shows what the final model actually uses and how it differs from the plan.*
+
+### In short
+- **The task:** STEG can only inspect a limited number of homes. Our model gives every client a **fraud risk score** and builds a **priority list**: who to visit first.
+- **The input:** for every client we summarize the bills (about 30 per client) into **39 numbers** (we call them *features*), for example "how many meters", "how long since the last bill", "how much consumption".
+- **How good is the list?** Our quality score is **ROC-AUC**. Pick one real fraud client and one honest client at random: the model puts the fraud client higher on the list in about **88 out of 100 cases** (0.876 in our cross-validation, **0.874** on the Zindi test set; 0.5 would be a coin flip, our first simple model reached 0.76).
+- **The data:** 135,493 clients, only 5.6% of them are fraud (about 1 in 18).
+
+### What the model looks at most
+
+![Most important features of the final model and the fraud rate per group](figures/feature_story.png)
+
+*Left: how much the model relies on each feature (share of the total, in %). Right: share of clients with fraud for four of them; the dashed line is the 5.6% average. Code and numbers: [15_feature-importance-story.ipynb](15_feature-importance-story.ipynb).*
+
+### The four strongest signals in plain words
+1. **Number of meters (most important, 16% of the model's decisions).** Clients with one meter are fraud in 2.1% of cases, with two meters 6.2%, with three 14.8% and with four or more **20.2%**. A meter that was replaced can be a sign of tampering. It can also be STEG's reaction after it already found fraud (see caveat below).
+2. **Time since the last bill (8%).** Clients whose last bill is more than 5 years old are almost never fraud (**0.7%** vs 6.5%). These are probably closed accounts that nobody inspects, so nobody finds fraud there.
+3. **Variety in the meter setup (8%).** Clients that use **three or more different meter codes** are fraud in **18.5%** of cases, clients with one code in only 3.3%. We found this by studying the fraud cases the model missed earlier.
+4. **Consumption (several features, 3 to 4% each).** The more a client consumed in total, the higher the fraud rate (1.2% for the lowest quarter, **8.4%** for the highest quarter). This is the signal our first EDA found, but it is weaker than the three above.
+
+**Region** (5% of the model's decisions) also matters, as our EDA showed (fraud rates from 3% to 10% between regions).
+
+### The plan versus the result
+
+| EDA finding (above) | What happened in the model |
+|---|---|
+| Client category 51, number of bills, tariff type | Kept. They help, but are **not** among the 12 most important features |
+| Region | Kept, 4th most important |
+| Meter reading goes backward | **Dropped.** The model hardly used it (0.02% of its decisions together with one more column) |
+| Unsteady consumption, outliers, consumption levels | Kept, as the consumption features. The "biggest bill per level" columns were dropped (no loss in score) |
+| Not planned: number of meters, variety of the meter setup, time since the last bill, client age, gaps between bills | **Added later, and they brought the biggest gain.** Each step was tested on the same data splits. Score (ROC-AUC, validation) 0.77 with the EDA features, 0.86 after time and meter features, **0.88** after the variety features |
+
+Lesson for the presentation: the EDA told us where to look, but the best signals (meters, activity, variety) only showed up when we looked at **how the meter setup and the billing history of a client change**, not only at how much a client consumes.
+
+### Be careful with the two strongest signals
+- **Number of meters** and **time since the last bill** may partly show **what STEG did after it found fraud** (replace the meter, stop visiting a closed account), not what the client did before. Our data has no date of detection, so we cannot prove it either way.
+- Both help our score on the Zindi test set, because it has the same pattern. For STEG in daily use, the model would mostly say "look at clients with several meters and do not inspect closed accounts". **We should ask STEG** how these two columns come about.
+- The variety features use `reading_remarque` (a reading remark code). On 2026-10-20 the team decided not to use this column as a feature. Feature set v3 changes that, see [protocol.md](protocol.md).
+- All numbers are links in the data, **not proof of cause**.
+
+Details: [11_feature-selection.ipynb](11_feature-selection.ipynb), [13_diversity-features.ipynb](13_diversity-features.ipynb), [14_final-model-submission.ipynb](14_final-model-submission.ipynb).
+
 ## Features to keep for the model
+
+*Plan from before the modelling (feature set v1). The final feature list is described in the section above and saved in `models/selected_features_v3.json`.*
 
 | Feature | Hypothesis | How to build it (per client) | Why |
 |---|---|---|---|
@@ -51,6 +97,6 @@ Ideas we looked at earlier, not in the notebook (see "Dropped" in `hypotheses.md
 
 ## Still to check
 - Why clients with rollover bills have more fraud (heavy use?).
-- Biggest consumption **drop**, `months_number`, gaps between bills, client age from `creation_date`.
+- ~~Biggest consumption **drop**, `months_number`, gaps between bills, client age from `creation_date`.~~ Done in [11_feature-selection.ipynb](11_feature-selection.ipynb): biggest drop did not help, `months_number`, gaps and client age are in the final model.
 
 Several of these checks came from our data analyst agent (see the review notes in `hypotheses.md`).

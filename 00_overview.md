@@ -24,6 +24,7 @@
 | 12 | [Re-tuning](12_retuning-new-features.ipynb) | Tunes again on the 30 features | Only a small gain; kept as a record, not part of the presentation |
 | 13 | [Diversity features](13_diversity-features.ipynb) | 12 new features (meter setup diversity, consumption shape, time activity), tuning, confusion matrices | **0.881** (feature set v3, 39 features) |
 | 14 | [Final model and submission](14_final-model-submission.ipynb) | Trains the final model on all labelled clients and writes the Zindi submission | CV 0.876, Zindi **0.874** |
+| 15 | [Feature importance story](15_feature-importance-story.ipynb) | Picture for the presentation: the most important features of the final model and the fraud rate per group (`figures/feature_story.png`) | Number of meters, time since the last bill and meter variety are the strongest signals |
 
 ## Other files
 

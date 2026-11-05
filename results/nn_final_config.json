@@ -1,0 +1,41 @@
+{
+  "selected_trial": 1,
+  "selection_rule": "highest inner-validation ROC-AUC of 30 random-search trials (inner stratified 80/20 split of the training clients, seed 42)",
+  "model": {
+    "n_layers": 2,
+    "units": 156,
+    "dropout": 0.3930321526384769,
+    "l2": 2.4229301715750363e-06,
+    "learning_rate": 0.0007957412573105,
+    "batch_size": 1024,
+    "activation": "relu",
+    "output": "sigmoid",
+    "loss": "binary_crossentropy",
+    "optimizer": "adam",
+    "class_weight": "balanced"
+  },
+  "final_epochs": 32,
+  "inner_validation": {
+    "roc_auc": 0.8701646944568927,
+    "pr_auc": 0.3299697449194004,
+    "best_epoch": 32,
+    "epochs_run": 42
+  },
+  "preprocessing": "nn_pipeline.make_preprocessor: median imputation, log1p on non-negative columns with skew > 1, StandardScaler; one-hot tarif_type/client_catg/region with levels < 1% grouped; fitted on training clients only",
+  "features": "models/selected_features_v3.json (39, in order)",
+  "final_seeds": [
+    42,
+    1,
+    2
+  ],
+  "search": {
+    "n_trials": 30,
+    "n_workers": 4,
+    "threads_per_worker": 2,
+    "search_wall_seconds": 440.88554983300855,
+    "trials_run_in_this_session": 30,
+    "sum_trial_fit_seconds": 1582.8153908781242,
+    "note": "wall time covers only the trials run in this session (resume would split it)"
+  },
+  "test_set_used": false
+}

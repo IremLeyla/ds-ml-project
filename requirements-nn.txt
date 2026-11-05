@@ -4,11 +4,13 @@
 # Create it with:
 #   uv venv --python 3.12 .venv-nn
 #   uv pip install --python .venv-nn/bin/python -r requirements-nn.txt
+# Versions pinned to the ones recorded in results/nn_environment.json (run of 2026-11-05).
 tensorflow==2.16.2
-pandas
-numpy
-scikit-learn
-matplotlib
-seaborn
-ipykernel
-nbformat
+keras==3.15.1
+pandas==3.0.6
+numpy==1.26.4
+scikit-learn==1.9.1
+matplotlib==3.11.2
+seaborn==0.13.2
+ipykernel==7.4.0
+nbformat==5.11.1

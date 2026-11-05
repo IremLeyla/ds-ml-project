@@ -47,4 +47,4 @@
 
 1. Download the Zindi data into `data/`. It is not in git (competition rules).
 2. Run the notebooks in the order of the table. Notebooks 02, 06, 11 and 13 write the cleaned data and the feature tables to `data/`, which the later notebooks read.
-3. For notebook 16: rebuild the v3 tables with `.venv/bin/python build_feature_tables.py`, create the TensorFlow environment `.venv-nn` (Python 3.12, `requirements-nn.txt`, see the README) and use it as the kernel.
+3. For notebook 16 you only need notebooks 02 and 06. Then rebuild the v3 tables with `.venv/bin/python build_feature_tables.py`, check the printed hashes, create the TensorFlow environment `.venv-nn` (Python 3.12, `requirements-nn.txt`) and use it as the kernel. The README section "Neural network" has the exact commands, the expected hashes and the scores a rerun should give. A full run overwrites the files in `results/`.

@@ -1,0 +1,14 @@
+# Separate environment for the neural-network notebook (16_neural-network.ipynb).
+# Why separate: TensorFlow has no Intel-Mac wheels for Python 3.13 (the project's Python),
+# and only TensorFlow 2.16.x exists for Intel Macs, which needs Python <= 3.12.
+# Create it with:
+#   uv venv --python 3.12 .venv-nn
+#   uv pip install --python .venv-nn/bin/python -r requirements-nn.txt
+tensorflow==2.16.2
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+ipykernel
+nbformat

@@ -143,3 +143,9 @@ dmypy.json
 # Competition data (do not push to the public repo)
 data/*
 !data/.gitkeep
+
+# Separate neural-network environment (Python 3.12, see requirements-nn.txt)
+.venv-nn/
+models/nn_*
+*.keras
+*.h5

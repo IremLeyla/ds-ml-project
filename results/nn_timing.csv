@@ -1,0 +1,28 @@
+,"Neural network (MLP, final config, seed 42)","LightGBM (final, feature set v3)"
+final_fit_seconds,11.27706341695739,7.173105790978298
+final_fit_seconds_all_seeds,"[11.27706341695739, 15.431997250008862, 15.663305041962303]",
+search_wall_seconds,440.88554983300855,
+search_sum_trial_fit_seconds,1582.8153908781242,
+search_trials,30.0,
+search_workers_x_threads,4x2,
+threads,all (8),8
+n_test,27099,27099
+inference_repeats,10,10
+inference_batch_seconds_median,0.05539758349186741,0.28913979150820524
+inference_ms_per_1000_median,2.0442667069584637,10.669758718336663
+inference_ms_per_1000_min,1.8913766560031482,9.605915641280923
+inference_ms_per_1000_max,3.2906226799771274,11.248663861619052
+inference_with_preprocessing_ms_per_1000_median,2.98338654668996,
+inference_with_preprocessing_ms_per_1000_min,2.913988228300874,
+inference_with_preprocessing_ms_per_1000_max,3.456240710534482,
+throughput_clients_per_second,335189.5519906701,93722.83164017908
+model_file,models/nn_seed42.keras,models/lightgbm_final.txt
+model_file_bytes,444218,3523429
+preprocessor_pickle_bytes,5865.0,
+peak_rss_mb,872.390625,313.40625
+note,"peak RSS is the whole notebook process (data, search bookkeeping, 3 fits): an upper bound","timing only; no metric computed, test labels not read"
+lightgbm_version,,4.7.0
+python,,3.13.18
+n_train,,108394.0
+inference_batch_seconds_min,,0.26031070796307176
+inference_batch_seconds_max,,0.3048275419860147

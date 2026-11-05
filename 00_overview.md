@@ -24,6 +24,8 @@
 | 12 | [Re-tuning](12_retuning-new-features.ipynb) | Tunes again on the 30 features | Only a small gain; kept as a record, not part of the presentation |
 | 13 | [Diversity features](13_diversity-features.ipynb) | 12 new features (meter setup diversity, consumption shape, time activity), tuning, confusion matrices | **0.881** (feature set v3, 39 features) |
 | 14 | [Final model and submission](14_final-model-submission.ipynb) | Trains the final model on all labelled clients and writes the Zindi submission | CV 0.876, Zindi **0.874** |
+| 16 | [Neural network](16_neural-network.ipynb) | Keras MLP challenger on the same 39 features: 30-trial search inside the training clients, final model with 3 seeds, test set scored once, timing of both models (run with `.venv-nn`) | ROC-AUC **0.8736** vs. LightGBM 0.881, so LightGBM stays ([decision-memo.md](decision-memo.md)) |
+| 17 | [Calibration and subgroups](17_calibration-subgroups.ipynb) | Post-hoc: calibration (Brier, log loss, reliability, isotonic calibration) and 23 client groups for both models; LightGBM refitted on the training clients ([lightgbm_posthoc_scores.py](lightgbm_posthoc_scores.py)) | Both over-confident until calibrated; NN behind in 19 of 20 groups |
 
 ## Other files
 
@@ -35,8 +37,14 @@
 | [hypotheses.md](hypotheses.md), [day1_insights.md](day1_insights.md) | The hypotheses we checked and the first notes from day 1 |
 | [cleaning.py](cleaning.py), [features.py](features.py) | Cleaning rules and feature functions, used by the notebooks |
 | `models/` | The final model (`lightgbm_final.txt`), its settings and its feature list |
-
+| [model-comparison-plan.md](model-comparison-plan.md) | Rules of the neural-network comparison, frozen before training |
+| [model-comparison-report.md](model-comparison-report.md) | Evidence of the comparison: scores, timing, errors, limitations |
+| [decision-memo.md](decision-memo.md) | Recommendation (keep LightGBM) and what would change it |
+| [nn_pipeline.py](nn_pipeline.py) | Preprocessing, model and search code used by notebook 16 |
+| `results/` | Result files of notebook 16 (search trials, final config, test runs, timing, environment) |
+| [build_feature_tables.py](build_feature_tables.py), [lightgbm_timing.py](lightgbm_timing.py) | Rebuild the v3 feature tables; time LightGBM without scoring it |
 ## How to run it
 
 1. Download the Zindi data into `data/`. It is not in git (competition rules).
 2. Run the notebooks in the order of the table. Notebooks 02, 06, 11 and 13 write the cleaned data and the feature tables to `data/`, which the later notebooks read.
+3. For notebook 16: rebuild the v3 tables with `.venv/bin/python build_feature_tables.py`, create the TensorFlow environment `.venv-nn` (Python 3.12, `requirements-nn.txt`, see the README) and use it as the kernel.

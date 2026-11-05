@@ -18,6 +18,23 @@ A machine learning project from the [neuefische](https://www.neuefische.de/) Dat
 - The public score is close to our cross-validation estimate (0.874 vs 0.876), so the validation was honest.
 - For comparison, published solutions on the same data reach about 0.864 (top 25%) and 0.883 (4th place of the original challenge). See [model_results.md](model_results.md).
 
+## Neural network vs. LightGBM
+
+After the project we added one neural-network challenger (a Keras feed-forward network on the same 39 features) and compared it fairly with the final LightGBM: same clients, same test set, same metric, rules frozen before training.
+
+| Test set (27,099 clients) | ROC-AUC | PR-AUC | Top 10% inspected: fraud caught of 1,513 |
+|---|---|---|---|
+| **LightGBM (final model)** | **0.881** | **0.371** | **864** |
+| Neural network (mean of 3 seeds) | 0.8736 | 0.3503 | 854.3 |
+
+**Decision: we keep LightGBM.** The network is 0.0074 ROC-AUC lower, more than our practical threshold of 0.005 and more than its seed spread, and it is not better on any other metric. It is faster at scoring and smaller, but that does not matter for a batch inspection list.
+
+- [model-comparison-plan.md](model-comparison-plan.md): the rules, frozen before training
+- [16_neural-network.ipynb](16_neural-network.ipynb): the neural network (search, final model, test scores, timing)
+- [17_calibration-subgroups.ipynb](17_calibration-subgroups.ipynb): post-hoc check of calibration and client groups for both models
+- [model-comparison-report.md](model-comparison-report.md): all evidence and limitations
+- [decision-memo.md](decision-memo.md): the recommendation and what would change it
+
 ## The problem
 
 - **Stakeholder:** STEG loses about 200 million Tunisian dinars because consumers tamper with their meters. It can only inspect a limited number of homes.
@@ -62,6 +79,11 @@ The biggest improvements came from **features built from the error analysis**, n
 | [hypotheses.md](hypotheses.md), [day1_insights.md](day1_insights.md) | The hypotheses we checked and the first notes |
 | [cleaning.py](cleaning.py), [features.py](features.py) | Cleaning rules and feature functions used by the notebooks |
 | `models/` | Final model (`lightgbm_final.txt`), its settings and its feature list |
+| [16_neural-network.ipynb](16_neural-network.ipynb), [nn_pipeline.py](nn_pipeline.py) | Neural-network challenger and its shared code |
+| [17_calibration-subgroups.ipynb](17_calibration-subgroups.ipynb), [lightgbm_posthoc_scores.py](lightgbm_posthoc_scores.py) | Post-hoc calibration and subgroup analysis of both models |
+| [model-comparison-plan.md](model-comparison-plan.md), [model-comparison-report.md](model-comparison-report.md), [decision-memo.md](decision-memo.md) | Neural network vs. LightGBM: frozen plan, evidence, decision |
+| `results/` | Result files of the neural-network comparison (search trials, final config, test scores, timing, environment) |
+| [build_feature_tables.py](build_feature_tables.py), [lightgbm_timing.py](lightgbm_timing.py) | Rebuild the v3 feature tables; time LightGBM (no scoring) |
 | `data/` | Not included (see below) |
 
 ## Getting started
@@ -82,6 +104,16 @@ uv sync
 **Run:** open the project in VS Code (`code .`), select the `.venv` kernel and run the notebooks in the order of [00_overview.md](00_overview.md). Some notebooks write cleaned data and feature tables to `data/`, which the later notebooks read.
 
 **Main libraries:** pandas, NumPy, scikit-learn, LightGBM, XGBoost, matplotlib, seaborn.
+
+**Neural network:** TensorFlow needs Python 3.12, so notebook 16 runs in a second environment:
+
+```bash
+uv venv --python 3.12 .venv-nn
+uv pip install --python .venv-nn/bin/python -r requirements-nn.txt
+.venv/bin/python build_feature_tables.py   # v3 feature tables, needs notebooks 02 and 06 first
+```
+
+Then open `16_neural-network.ipynb` with the `.venv-nn` kernel.
 
 ## Limitations
 

@@ -1,0 +1,9 @@
+{
+  "n_trials": 30,
+  "n_workers": 4,
+  "threads_per_worker": 2,
+  "search_wall_seconds": 440.88554983300855,
+  "trials_run_in_this_session": 30,
+  "sum_trial_fit_seconds": 1582.8153908781242,
+  "note": "wall time covers only the trials run in this session (resume would split it)"
+}

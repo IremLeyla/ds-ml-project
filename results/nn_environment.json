@@ -1,0 +1,53 @@
+{
+  "date": "2026-11-05",
+  "hardware": {
+    "machine": "arm64",
+    "processor": "Apple M2",
+    "cpu_cores": 8,
+    "ram_gb": 8,
+    "os": "macOS 26.2",
+    "accelerator": "none (CPU only, no Metal)"
+  },
+  "nn_environment": {
+    "path": ".venv-nn",
+    "python": "3.12.14",
+    "tensorflow": "2.16.2",
+    "keras": "3.15.1",
+    "scikit-learn": "1.9.1",
+    "pandas": "3.0.6",
+    "numpy": "1.26.4"
+  },
+  "lightgbm_environment": {
+    "path": ".venv",
+    "python": "3.13.18",
+    "lightgbm": "4.7.0"
+  },
+  "seeds": {
+    "search": 42,
+    "final": [
+      42,
+      1,
+      2
+    ]
+  },
+  "op_determinism": true,
+  "search": {
+    "n_trials": 30,
+    "n_workers": 4,
+    "threads_per_worker": 2,
+    "search_wall_seconds": 440.88554983300855,
+    "trials_run_in_this_session": 30,
+    "sum_trial_fit_seconds": 1582.8153908781242,
+    "note": "wall time covers only the trials run in this session (resume would split it)"
+  },
+  "final_config_file": "results/nn_final_config.json",
+  "feature_table_sha256_16": {
+    "X_train_v3.csv": "1cf6b683d2da1516",
+    "X_valid_v3.csv": "5f880604ffea81e0",
+    "y_train.csv": "5174ffcfe33498d9",
+    "y_valid.csv": "1d12f28fd072ac98"
+  },
+  "notebook_runtime_seconds_this_run": 64.56526850000955,
+  "total_nn_compute_seconds": 483.2579155419371,
+  "note": "notebook runtime of this run excludes the search when it was loaded from results/nn_search_trials.csv"
+}

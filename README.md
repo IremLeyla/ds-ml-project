@@ -105,15 +105,29 @@ uv sync
 
 **Main libraries:** pandas, NumPy, scikit-learn, LightGBM, XGBoost, matplotlib, seaborn.
 
-**Neural network:** TensorFlow needs Python 3.12, so notebook 16 runs in a second environment:
+**Neural network:** TensorFlow 2.16 needs Python 3.12, so notebook 16 runs in a second environment. You do not need notebooks 03–05 or 07–14 for it. From a fresh clone with the raw data in `data/`, the steps below take about 5 minutes (most of it is the TensorFlow download):
 
 ```bash
+# 1. main environment, then the cleaned data (02) and the v1 tables + train/validation split (06)
+uv sync
+uv run --with nbconvert jupyter nbconvert --to notebook --execute --inplace 02_eda.ipynb
+uv run --with nbconvert jupyter nbconvert --to notebook --execute --inplace 06_feature-engineering.ipynb
+
+# 2. the v3 feature tables (the 39 features); prints a hash for each table
+.venv/bin/python build_feature_tables.py
+
+# 3. the NN environment
 uv venv --python 3.12 .venv-nn
 uv pip install --python .venv-nn/bin/python -r requirements-nn.txt
-.venv/bin/python build_feature_tables.py   # v3 feature tables, needs notebooks 02 and 06 first
 ```
 
-Then open `16_neural-network.ipynb` with the `.venv-nn` kernel.
+(Running the notebooks with `--inplace` overwrites their saved outputs. Use `--output-dir <folder>` to keep the committed versions.)
+
+**Check the feature tables before training.** Notebook 16 stops if the hashes differ. `build_feature_tables.py` should print `X_train_v3 1cf6b683d2da1516`, `X_valid_v3 5f880604ffea81e0` and `X_test_v3 ca64c741c50b1432`. The labels are not printed. Check them with `shasum -a 256 data/features/y_*.csv`: `y_train 5174ffcfe33498d9…`, `y_valid 1d12f28fd072ac98…`. On an Intel Mac the X tables can get different hashes (see [protocol.md](protocol.md), 2026-11-05) and the notebook's check fails. On Intel, LightGBM also needs `brew install libomp`.
+
+**Run notebook 16** with the `.venv-nn` kernel (also needs `.venv`, because section 8 calls `.venv/bin/python lightgbm_timing.py`). The 30 search trials are loaded from `results/nn_search_trials.csv`, so the search is not repeated. Delete that file to rerun the search (about 8 minutes with 4 workers on an M2). Note: a full run **overwrites the committed files in `results/`**, and `nn_environment.json` always records "Apple M2, 8 GB" (hard-coded in section 9). Run it on a branch and check `git diff results/` before you commit.
+
+**What to expect.** Op determinism makes a run repeatable on the *same* machine only. A check on 2026-11-05 on an Apple M4 (macOS 15.5, same library versions) gave for seed 42: ROC-AUC 0.87352 (committed 0.87353), PR-AUC 0.3472 (0.3493), 853 of 1,513 fraud caught in the top 10% (852). Differences of this size are normal across machines and do not change the decision (LightGBM 0.881).
 
 ## Limitations
 
